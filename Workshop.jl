@@ -1,4 +1,4 @@
-using CirculatorySystemModels, ModelingToolkit, DifferentialEquations, Plots
+using CirculatorySystemModels, ModelingToolkit, DifferentialEquations, Plots, UnPack
 
 ## Go through basic equations of CirculatorySystemModels ## 
 
@@ -39,7 +39,8 @@ circ_eqs = [
 # Examine equation 
 
 # give mean pressures as IC
-u0 = [10.0]
+@unpack C₊Δp = circ_sys
+u0 = [C₊Δp => 10.0]
 @time prob = ODAEProblem(circ_sys, u0, (0.0, 10.0))
 
 @time sol = solve(prob)
@@ -193,16 +194,7 @@ plot(sol, idxs = C.V)
 ## Nikolai ODE model 
 
 # Function for the valves
-function Valve(R, deltaP)
-    q = 0.0
-    if (-deltaP) < 0.0 
-        q =  deltaP/R
-    else
-        q = 0.0
-    end
-    return q
-
-end
+Valve(R, deltaP) = ifelse(-deltaP < 0.0, deltaP/R, 0.0)
 
 # Functions for the Ventricle
 function ShiElastance(t, Eₘᵢₙ, Eₘₐₓ, τ, τₑₛ, τₑₚ, Eshift)
